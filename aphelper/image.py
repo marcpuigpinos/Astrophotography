@@ -14,14 +14,11 @@ def set_brightness(data, brightness, bits):
     data = data * brightness
     return data.astype(bits[1])
 
-def mirrorH(data, resx, resy):
-    data_aux = data
-    for i in range(resx):
-        for j in range(int(resy/2)):
-            data[i,j] = data_aux[i,resy-1-j]
-        for j in range(int(resy/2)):
-            data[i,resy-1-j] = data_aux[i,j]
-    return data
+def mirrorH(data):
+    return np.flip(data, axis=0)
+
+def mirrorV(data):
+    return np.flip(data, axis=1)
 
 class fits_image:
     def __init__(self, file_name):
@@ -89,16 +86,24 @@ class fits_image:
         self.__resx = self.__resy
         self.__resy = resx
 
-    def __mirrorH(self):
-        self.__data = mirrorH(self.__data, self.__resx, self.__resy)
+    def mirrorH(self):
+        self.__data = mirrorH(self.__data)
         if self.__layers == 3:
-            self.__red = mirrorH(self.__red, self.__resx, self.__resy)
-            self.__green = mirrorH(self.__green, self.__resx, self.__resy)
-            self.__blue = mirrorH(self.__blue, self.__resx, self.__resy)
-        
+            self.__red = mirrorH(self.__red)
+            self.__green = mirrorH(self.__green)
+            self.__blue = mirrorH(self.__blue)
 
-        
+    def mirrorV(self):
+        self.__data = mirrorV(self.__data)
+        if self.__layers == 3:
+            self.__red = mirrorV(self.__red)
+            self.__green = mirrorV(self.__green)
+            self.__blue = mirrorV(self.__blue)
 
-        
+if __name__ == '__main__':
+    
+    import image
 
-
+    img = image.fits_image("test/moon_final.fit")
+    img.info()
+    img.save("test/Moon.jpg", brightness=0.8)
